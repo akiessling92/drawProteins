@@ -72,8 +72,27 @@ drawProteins::draw_canvas(bpac_data) -> p
 p <- drawProteins::draw_chains(p, bpac_data, labels = c("BpaC"))
 # Draw regions
 p <- drawProteins::draw_regions(p, bpac_data)
-# Move legend to bottom
-p <- p + ggplot2::theme(legend.position="bottom") + ggplot2::labs(fill="")
+# Move legend to bottom and in two rows
+p <- p + ggplot2::theme(legend.position="bottom") + ggplot2::labs(fill="") + ggplot2::guides(fill=guide_legend(nrow=2,byrow=TRUE)) 
+
+# Make canvas longer
+
+prots_feat_red <- httr::content(bpac_json)
+
+features_total_plot <- NULL
+for(i in 1:length(prots_feat_red)){
+  # the extract_feat_acc() function takes features into a data.frame
+  features_temp <- drawProteins::extract_feat_acc(prots_feat_red[[i]])
+  features_temp$order <- i  # this order is needed for plotting later
+  features_total_plot <- ggplot2::rbind(features_total_plot, features_temp)
+}
+
+
+plot_start <- -max(features_total_plot$end)*0.2
+
+plot_end <- max(features_total_plot$end) + max(features_total_plot$end)*0.2
+
+p <- p + ggplot2::xlim(plot_start, plot_end)
 
 # Add title and subtitle
 
